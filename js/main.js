@@ -87,16 +87,15 @@ function filterJobs() {
     renderJobs();
 }
 
-// ================== SECRET ADMIN ACCESS ==================
+// ================== SECRET ADMIN ACCESS (GitHub Pages Friendly) ==================
 function checkSecretAccess() {
-    const path = window.location.pathname.toLowerCase();
-    console.log("Current path:", path);   // ← For debugging
-
-    if (path.endsWith('/secretadmin') || 
-        path.endsWith('/secretadmin/') || 
-        window.location.search.includes('secretadmin')) {
-        console.log("✅ Secret admin path detected!");
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('access') === 'admin') {
+        console.log("✅ Secret admin access detected via query param");
         showAdminLogin();
+        // Clean up the URL (optional - removes ?admin=secret from address bar)
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
