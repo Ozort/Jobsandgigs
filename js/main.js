@@ -1,4 +1,6 @@
-// Main UI & Job Functions
+// js/main.js
+
+// ================== MAIN UI & JOB FUNCTIONS ==================
 function showHome() {
     document.getElementById('home-page').classList.remove('hidden');
     document.getElementById('job-detail-page').classList.add('hidden');
@@ -85,19 +87,29 @@ function filterJobs() {
     renderJobs();
 }
 
-// Secret Admin Path
+// ================== SECRET ADMIN ACCESS ==================
 function checkSecretAccess() {
-    if (window.location.pathname.endsWith('/secretadmin')) {
+    const path = window.location.pathname.toLowerCase();
+    console.log("Current path:", path);   // ← For debugging
+
+    if (path.endsWith('/secretadmin') || 
+        path.endsWith('/secretadmin/') || 
+        window.location.search.includes('secretadmin')) {
+        console.log("✅ Secret admin path detected!");
         showAdminLogin();
     }
 }
 
+// ================== INIT ==================
 async function init() {
     await fetchJobs();
     checkSecretAccess();
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) currentUser = user;
+    if (user) {
+        currentUser = user;
+        showAdminDashboard();
+    }
 }
 
 window.onload = init;
