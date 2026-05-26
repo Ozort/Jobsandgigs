@@ -5,136 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jobs&Gigs</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .header-bg { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); }
+    </style>
 </head>
 <body class="bg-gray-50">
 
-    <!-- Navbar -->
-    <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white">
-                    <i class="fas fa-briefcase text-3xl suitcase-icon"></i>
-                </div>
-                <span class="text-3xl font-bold tracking-tighter text-gray-900">Jobs<span class="text-red-600">&amp;Gigs</span></span>
+<nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white">
+                <i class="fas fa-briefcase text-3xl"></i>
             </div>
-            <a href="#" onclick="showHome()" class="text-gray-700 hover:text-red-600 font-medium">Browse Jobs</a>
-        </div>
-    </nav>
-
-    <!-- HOME PAGE -->
-    <div id="home-page">
-        <header class="header-bg text-white py-24">
-            <div class="max-w-7xl mx-auto px-6 text-center">
-                <div class="flex justify-center mb-6">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-white/20 rounded-3xl flex items-center justify-center text-white">
-                            <i class="fas fa-briefcase text-5xl suitcase-icon"></i>
-                        </div>
-                        <span class="text-5xl font-bold tracking-tighter">Jobs<span class="text-white">&amp;Gigs</span></span>
-                    </div>
-                </div>
-                <h1 class="text-6xl font-bold tracking-tight mb-4">Find Your Next Opportunity</h1>
-                <p class="text-xl text-red-100 max-w-2xl mx-auto">Discover meaningful jobs and exciting gigs from trusted posters.</p>
-            </div>
-        </header>
-
-        <div class="max-w-7xl mx-auto px-6 py-8">
-            <div class="relative mb-8">
-                <input id="search-input" type="text" placeholder="Search jobs, companies, or keywords..." 
-                       onkeyup="filterJobs()" 
-                       class="w-full px-6 py-4 pl-12 border border-gray-300 rounded-3xl focus:outline-none focus:border-red-500 text-lg">
-                <i class="fas fa-search absolute left-5 top-5 text-gray-400"></i>
-            </div>
-
-            <div class="flex justify-between items-end mb-8">
-                <h2 class="text-4xl font-semibold">Latest Opportunities</h2>
-                <div class="text-sm text-gray-500" id="job-count">0 jobs</div>
-            </div>
-            <div id="jobs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <span class="text-3xl font-bold tracking-tighter">Jobs<span class="text-red-600">&amp;Gigs</span></span>
         </div>
     </div>
+</nav>
 
-    <!-- JOB DETAIL PAGE -->
-    <div id="job-detail-page" class="hidden max-w-4xl mx-auto px-6 py-12">
-        <button onclick="showHome()" class="flex items-center gap-2 text-red-600 hover:text-red-700 mb-8 font-medium">
-            ← Back to all jobs
-        </button>
-        <div id="job-detail-content" class="bg-white rounded-3xl shadow-xl p-10"></div>
+<div id="home-page" class="min-h-screen">
+    <header class="header-bg text-white py-24 text-center">
+        <h1 class="text-6xl font-bold mb-4">Jobs&Gigs</h1>
+        <p class="text-xl">Find meaningful jobs and gigs</p>
+    </header>
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <h2 class="text-3xl font-semibold mb-8">Latest Opportunities</h2>
+        <div id="jobs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
+</div>
 
-    <!-- ADMIN LOGIN MODAL -->
-    <div id="admin-login-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl p-10 w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="mx-auto w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-white mb-4">
-                    <i class="fas fa-briefcase text-4xl"></i>
-                </div>
-                <h3 class="text-2xl font-semibold">Admin Login</h3>
-            </div>
-            <input id="admin-email" type="email" placeholder="Email" class="w-full px-6 py-4 border rounded-2xl mb-4">
-            <input id="admin-password" type="password" placeholder="Password" class="w-full px-6 py-4 border rounded-2xl mb-6">
-            <button onclick="loginAdmin()" class="w-full py-4 bg-red-600 text-white rounded-2xl font-semibold hover:bg-red-700">Login</button>
-        </div>
+<!-- ADMIN LOGIN -->
+<div id="admin-login" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-3xl p-10 w-full max-w-md">
+        <h3 class="text-2xl font-semibold mb-6 text-center">Admin Login</h3>
+        <input id="email" type="email" placeholder="Email" class="w-full px-6 py-4 border rounded-2xl mb-4">
+        <input id="password" type="password" placeholder="Password" class="w-full px-6 py-4 border rounded-2xl mb-6">
+        <button onclick="loginAdmin()" class="w-full py-4 bg-red-600 text-white rounded-2xl font-semibold">Login</button>
     </div>
+</div>
 
-    <!-- ADMIN DASHBOARD -->
-    <div id="admin-dashboard" class="hidden max-w-7xl mx-auto px-6 py-12">
-        <div class="flex justify-between items-center mb-10">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white">
-                    <i class="fas fa-briefcase text-3xl"></i>
-                </div>
-                <div>
-                    <h2 class="text-4xl font-bold">Admin Portal</h2>
-                    <p class="text-gray-500">Manage Jobs &amp; Gigs</p>
-                </div>
-            </div>
-            <button onclick="logoutAdmin()" class="px-6 py-3 text-red-600 hover:bg-red-50 rounded-2xl font-medium">Logout</button>
-        </div>
-
-        <!-- Add New Job -->
-        <div class="bg-white rounded-3xl p-8 mb-12 shadow">
-            <h3 class="text-2xl font-semibold mb-6">Post New Job / Gig</h3>
-            <form id="job-form" onsubmit="addJob(event)">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input id="title" required placeholder="Job Title" class="px-5 py-4 border rounded-2xl">
-                    <input id="company" required placeholder="Company / Poster" class="px-5 py-4 border rounded-2xl">
-                    <textarea id="description" required rows="5" placeholder="Full description..." class="md:col-span-2 px-5 py-4 border rounded-3xl"></textarea>
-                    <input id="location" placeholder="Location (Remote, City...)" class="px-5 py-4 border rounded-2xl">
-                    <input id="salary" placeholder="Salary / Rate" class="px-5 py-4 border rounded-2xl">
-                </div>
-                <button type="submit" class="mt-8 w-full bg-red-600 hover:bg-red-700 text-white py-5 rounded-3xl font-semibold">Post Job</button>
-            </form>
-        </div>
-
-        <!-- Jobs Table -->
-        <div class="bg-white rounded-3xl shadow overflow-hidden">
-            <div class="p-8 border-b bg-gray-50 flex justify-between items-center">
-                <h3 class="text-2xl font-semibold">All Posted Jobs</h3>
-                <input id="admin-search" placeholder="Search in admin..." onkeyup="filterAdminJobs()" 
-                       class="px-4 py-2 border rounded-2xl w-80">
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="text-left p-6">Title</th>
-                            <th class="text-left p-6">Company</th>
-                            <th class="text-left p-6">Posted</th>
-                            <th class="w-32 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-jobs-table" class="divide-y"></tbody>
-                </table>
-            </div>
-        </div>
+<!-- ADMIN DASHBOARD -->
+<div id="admin-dashboard" class="hidden max-w-7xl mx-auto px-6 py-12">
+    <div class="flex justify-between items-center mb-10">
+        <h2 class="text-4xl font-bold">Admin Portal</h2>
+        <button onclick="logoutAdmin()" class="px-6 py-3 bg-red-600 text-white rounded-2xl">Logout</button>
     </div>
+    <p class="text-center text-lg py-20">✅ Admin Dashboard Ready</p>
+</div>
 
-    <script src="js/supabase.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/admin.js"></script>
+<script>
+// === CHANGE THESE ===
+const SUPABASE_URL = 'https://usgjrtcvcrpqqocvleny.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ2pydGN2Y3JwcXFvY3ZsZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDg2OTgsImV4cCI6MjA5NTM4NDY5OH0.0ju7BrUueQhldAyya--NZYctJ4AOhTll4eop45fVpZc';
+
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function showAdmin() {
+    document.getElementById('admin-login').classList.remove('hidden');
+}
+
+async function loginAdmin() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) alert(error.message);
+    else {
+        document.getElementById('admin-login').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+    }
+}
+
+async function logoutAdmin() {
+    await supabase.auth.signOut();
+    document.getElementById('admin-dashboard').classList.add('hidden');
+}
+
+// Auto open admin if ?admin=secret
+if (window.location.search.includes('admin=secret')) {
+    showAdmin();
+}
+</script>
 </body>
 </html>
