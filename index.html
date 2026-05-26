@@ -10,82 +10,157 @@
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
         .header-bg { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); }
+        .job-card { transition: all 0.3s; }
+        .job-card:hover { transform: translateY(-8px); }
     </style>
 </head>
 <body class="bg-gray-50">
 
-<nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
-    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white">
-                <i class="fas fa-briefcase text-3xl"></i>
+    <!-- Navbar -->
+    <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-red-600 rounded-2xl flex items-center justify-center text-white">
+                    <i class="fas fa-briefcase text-2xl"></i>
+                </div>
+                <span class="text-3xl font-bold tracking-tight">Jobs<span class="text-red-600">&amp;Gigs</span></span>
             </div>
-            <span class="text-3xl font-bold tracking-tighter">Jobs<span class="text-red-600">&amp;Gigs</span></span>
+        </div>
+    </nav>
+
+    <!-- HOME PAGE -->
+    <div id="home-page">
+        <header class="header-bg text-white py-20 text-center">
+            <h1 class="text-5xl font-bold mb-4">Find Your Next Opportunity</h1>
+            <p class="text-xl text-red-100">Discover jobs and gigs</p>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-6 py-10">
+            <input id="search-input" type="text" placeholder="Search jobs or companies..." 
+                   onkeyup="filterJobs()" 
+                   class="w-full px-6 py-4 rounded-3xl border border-gray-300 focus:border-red-500 text-lg">
+
+            <div class="mt-10">
+                <h2 class="text-3xl font-semibold mb-6">Latest Opportunities</h2>
+                <div id="jobs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
         </div>
     </div>
-</nav>
 
-<div id="home-page" class="min-h-screen">
-    <header class="header-bg text-white py-24 text-center">
-        <h1 class="text-6xl font-bold mb-4">Jobs&Gigs</h1>
-        <p class="text-xl">Find meaningful jobs and gigs</p>
-    </header>
-    <div class="max-w-7xl mx-auto px-6 py-12">
-        <h2 class="text-3xl font-semibold mb-8">Latest Opportunities</h2>
-        <div id="jobs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-10 w-full max-w-md">
+            <h3 class="text-2xl font-semibold mb-6 text-center">Admin Login</h3>
+            <input id="email" type="email" placeholder="Email" class="w-full px-5 py-4 border rounded-2xl mb-4">
+            <input id="password" type="password" placeholder="Password" class="w-full px-5 py-4 border rounded-2xl mb-6">
+            <button onclick="loginAdmin()" class="w-full py-4 bg-red-600 text-white rounded-2xl font-semibold">Login</button>
+        </div>
     </div>
-</div>
 
-<!-- ADMIN LOGIN -->
-<div id="admin-login" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl p-10 w-full max-w-md">
-        <h3 class="text-2xl font-semibold mb-6 text-center">Admin Login</h3>
-        <input id="email" type="email" placeholder="Email" class="w-full px-6 py-4 border rounded-2xl mb-4">
-        <input id="password" type="password" placeholder="Password" class="w-full px-6 py-4 border rounded-2xl mb-6">
-        <button onclick="loginAdmin()" class="w-full py-4 bg-red-600 text-white rounded-2xl font-semibold">Login</button>
+    <!-- ADMIN DASHBOARD -->
+    <div id="admin-dashboard" class="hidden max-w-7xl mx-auto px-6 py-12">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-4xl font-bold">Admin Portal</h2>
+            <button onclick="logoutAdmin()" class="px-6 py-3 bg-red-600 text-white rounded-2xl">Logout</button>
+        </div>
+        
+        <div class="bg-white rounded-3xl p-8 shadow mb-10">
+            <h3 class="text-xl font-semibold mb-4">Post New Job</h3>
+            <form id="job-form" onsubmit="addJob(event)">
+                <input id="title" required placeholder="Job Title" class="w-full px-5 py-4 border rounded-2xl mb-4">
+                <input id="company" required placeholder="Company" class="w-full px-5 py-4 border rounded-2xl mb-4">
+                <textarea id="description" required placeholder="Description" rows="4" class="w-full px-5 py-4 border rounded-3xl mb-4"></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="location" placeholder="Location" class="px-5 py-4 border rounded-2xl">
+                    <input id="salary" placeholder="Salary" class="px-5 py-4 border rounded-2xl">
+                </div>
+                <button type="submit" class="mt-6 w-full py-4 bg-red-600 text-white rounded-3xl font-semibold">Post Job</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<!-- ADMIN DASHBOARD -->
-<div id="admin-dashboard" class="hidden max-w-7xl mx-auto px-6 py-12">
-    <div class="flex justify-between items-center mb-10">
-        <h2 class="text-4xl font-bold">Admin Portal</h2>
-        <button onclick="logoutAdmin()" class="px-6 py-3 bg-red-600 text-white rounded-2xl">Logout</button>
-    </div>
-    <p class="text-center text-lg py-20">✅ Admin Dashboard Ready</p>
-</div>
+    <script>
+        // === UPDATE THESE ===
+        const SUPABASE_URL = 'https://usgjrtcvcrpqqocvleny.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ2pydGN2Y3JwcXFvY3ZsZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDg2OTgsImV4cCI6MjA5NTM4NDY5OH0.0ju7BrUueQhldAyya--NZYctJ4AOhTll4eop45fVpZc';
 
-<script>
-// === CHANGE THESE ===
-const SUPABASE_URL = 'https://usgjrtcvcrpqqocvleny.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ2pydGN2Y3JwcXFvY3ZsZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDg2OTgsImV4cCI6MjA5NTM4NDY5OH0.0ju7BrUueQhldAyya--NZYctJ4AOhTll4eop45fVpZc';
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let jobs = [];
+        let currentUser = null;
 
-function showAdmin() {
-    document.getElementById('admin-login').classList.remove('hidden');
-}
+        // Secret Admin Access
+        if (window.location.search.includes('admin=secret')) {
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
 
-async function loginAdmin() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert(error.message);
-    else {
-        document.getElementById('admin-login').classList.add('hidden');
-        document.getElementById('admin-dashboard').classList.remove('hidden');
-    }
-}
+        async function loginAdmin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                alert("Login failed: " + error.message);
+            } else {
+                currentUser = data.user;
+                document.getElementById('admin-modal').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+            }
+        }
 
-async function logoutAdmin() {
-    await supabase.auth.signOut();
-    document.getElementById('admin-dashboard').classList.add('hidden');
-}
+        async function logoutAdmin() {
+            await supabase.auth.signOut();
+            document.getElementById('admin-dashboard').classList.add('hidden');
+        }
 
-// Auto open admin if ?admin=secret
-if (window.location.search.includes('admin=secret')) {
-    showAdmin();
-}
-</script>
+        async function addJob(e) {
+            e.preventDefault();
+            const newJob = {
+                title: document.getElementById('title').value,
+                company: document.getElementById('company').value,
+                description: document.getElementById('description').value,
+                location: document.getElementById('location').value,
+                salary: document.getElementById('salary').value
+            };
+            await supabase.from('jobs').insert(newJob);
+            alert('Job posted!');
+            e.target.reset();
+        }
+
+        // Load jobs (public)
+        async function loadJobs() {
+            const { data } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
+            jobs = data || [];
+            renderJobs();
+        }
+
+        function renderJobs() {
+            const container = document.getElementById('jobs-list');
+            container.innerHTML = jobs.map(job => `
+                <div class="job-card bg-white p-6 rounded-3xl shadow">
+                    <h3 class="font-semibold text-xl">${job.title}</h3>
+                    <p class="text-red-600">${job.company}</p>
+                    <p class="text-gray-600 mt-3 line-clamp-3">${job.description}</p>
+                </div>
+            `).join('');
+        }
+
+        function filterJobs() {
+            const term = document.getElementById('search-input').value.toLowerCase();
+            const filtered = jobs.filter(j => 
+                j.title.toLowerCase().includes(term) || 
+                j.company.toLowerCase().includes(term)
+            );
+            // Simple render for now
+            document.getElementById('jobs-list').innerHTML = filtered.map(job => `
+                <div class="job-card bg-white p-6 rounded-3xl shadow">
+                    <h3 class="font-semibold text-xl">${job.title}</h3>
+                    <p class="text-red-600">${job.company}</p>
+                </div>
+            `).join('');
+        }
+
+        window.onload = loadJobs;
+    </script>
 </body>
 </html>
