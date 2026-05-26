@@ -3,164 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jobs&Gigs</title>
+    <title>Jobs&amp;Gigs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .job-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .job-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgb(220 38 38 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
         .header-bg { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); }
-        .job-card { transition: all 0.3s; }
-        .job-card:hover { transform: translateY(-8px); }
+        .suitcase-icon { filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.1)); }
     </style>
 </head>
 <body class="bg-gray-50">
-
-    <!-- Navbar -->
     <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-red-600 rounded-2xl flex items-center justify-center text-white">
-                    <i class="fas fa-briefcase text-2xl"></i>
+                <div class="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-inner">
+                    <i class="fas fa-briefcase text-3xl suitcase-icon"></i>
                 </div>
-                <span class="text-3xl font-bold tracking-tight">Jobs<span class="text-red-600">&amp;Gigs</span></span>
+                <span class="text-3xl font-bold tracking-tighter text-gray-900">Jobs<span class="text-red-600">&amp;Gigs</span></span>
+            </div>
+            <div class="flex items-center gap-8 text-lg">
+                <a href="#" onclick="showHome()" class="text-gray-700 hover:text-red-600 font-medium transition">Browse Jobs</a>
             </div>
         </div>
     </nav>
 
-    <!-- HOME PAGE -->
     <div id="home-page">
-        <header class="header-bg text-white py-20 text-center">
-            <h1 class="text-5xl font-bold mb-4">Find Your Next Opportunity</h1>
-            <p class="text-xl text-red-100">Discover jobs and gigs</p>
+        <header class="header-bg text-white py-24">
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-white/20 rounded-3xl flex items-center justify-center text-white shadow-xl">
+                            <i class="fas fa-briefcase text-5xl suitcase-icon"></i>
+                        </div>
+                        <span class="text-5xl font-bold tracking-tighter">Jobs<span class="text-white">&amp;Gigs</span></span>
+                    </div>
+                </div>
+                <h1 class="text-6xl font-bold tracking-tight mb-4">Find Your Next Opportunity</h1>
+                <p class="text-xl text-red-100 max-w-2xl mx-auto">Discover meaningful jobs and exciting gigs from trusted posters.</p>
+                <div class="mt-10">
+                    <button onclick="document.getElementById('jobs-list').scrollIntoView({ behavior: 'smooth' })"
+                            class="inline-flex items-center gap-3 bg-white text-red-700 px-10 py-5 rounded-3xl font-semibold text-xl hover:bg-red-50 transition shadow-lg">
+                        Browse All Jobs <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
         </header>
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="text-4xl font-semibold text-gray-900">Latest Opportunities</h2>
+                <div class="text-sm text-gray-500" id="job-count">Loading...</div>
+            </div>
+            <div id="jobs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+    </div>
 
-        <div class="max-w-7xl mx-auto px-6 py-10">
-            <input id="search-input" type="text" placeholder="Search jobs or companies..." 
-                   onkeyup="filterJobs()" 
-                   class="w-full px-6 py-4 rounded-3xl border border-gray-300 focus:border-red-500 text-lg">
+    <div id="job-detail-page" class="hidden max-w-4xl mx-auto px-6 py-12">
+        <button onclick="showHome()" class="flex items-center gap-2 text-red-600 hover:text-red-700 mb-8 font-medium">
+            <i class="fas fa-arrow-left"></i> Back to all jobs
+        </button>
+        <div id="job-detail-content" class="bg-white rounded-3xl shadow-xl p-10"></div>
+    </div>
 
-            <div class="mt-10">
-                <h2 class="text-3xl font-semibold mb-6">Latest Opportunities</h2>
-                <div id="jobs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="admin-login-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-10 w-full max-w-md shadow-2xl">
+            <div class="flex justify-center mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white">
+                        <i class="fas fa-briefcase text-3xl"></i>
+                    </div>
+                    <span class="text-3xl font-bold tracking-tighter">Jobs<span class="text-red-600">&amp;Gigs</span></span>
+                </div>
+            </div>
+            <h3 class="text-2xl font-semibold mb-6 text-center">Admin Access</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input id="admin-email" type="email" placeholder="admin@yourdomain.com"
+                       class="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-red-500 text-lg">
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input id="admin-password" type="password" placeholder="Password"
+                       class="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-red-500 text-lg"
+                       onkeydown="if(event.key==='Enter') loginAdmin()">
+            </div>
+            <div id="login-error" class="hidden mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-sm"></div>
+            <div class="flex gap-4">
+                <button onclick="hideAdminLogin()" class="flex-1 py-4 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50">Cancel</button>
+                <button id="login-btn" onclick="loginAdmin()" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-semibold hover:bg-red-700">Login</button>
             </div>
         </div>
     </div>
 
-    <!-- ADMIN LOGIN MODAL -->
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl p-10 w-full max-w-md">
-            <h3 class="text-2xl font-semibold mb-6 text-center">Admin Login</h3>
-            <input id="email" type="email" placeholder="Email" class="w-full px-5 py-4 border rounded-2xl mb-4">
-            <input id="password" type="password" placeholder="Password" class="w-full px-5 py-4 border rounded-2xl mb-6">
-            <button onclick="loginAdmin()" class="w-full py-4 bg-red-600 text-white rounded-2xl font-semibold">Login</button>
-        </div>
-    </div>
-
-    <!-- ADMIN DASHBOARD -->
     <div id="admin-dashboard" class="hidden max-w-7xl mx-auto px-6 py-12">
         <div class="flex justify-between items-center mb-10">
-            <h2 class="text-4xl font-bold">Admin Portal</h2>
-            <button onclick="logoutAdmin()" class="px-6 py-3 bg-red-600 text-white rounded-2xl">Logout</button>
-        </div>
-        
-        <div class="bg-white rounded-3xl p-8 shadow mb-10">
-            <h3 class="text-xl font-semibold mb-4">Post New Job</h3>
-            <form id="job-form" onsubmit="addJob(event)">
-                <input id="title" required placeholder="Job Title" class="w-full px-5 py-4 border rounded-2xl mb-4">
-                <input id="company" required placeholder="Company" class="w-full px-5 py-4 border rounded-2xl mb-4">
-                <textarea id="description" required placeholder="Description" rows="4" class="w-full px-5 py-4 border rounded-3xl mb-4"></textarea>
-                <div class="grid grid-cols-2 gap-4">
-                    <input id="location" placeholder="Location" class="px-5 py-4 border rounded-2xl">
-                    <input id="salary" placeholder="Salary" class="px-5 py-4 border rounded-2xl">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white">
+                        <i class="fas fa-briefcase text-3xl"></i>
+                    </div>
+                    <span class="text-3xl font-bold tracking-tighter">Jobs<span class="text-red-600">&amp;Gigs</span></span>
                 </div>
-                <button type="submit" class="mt-6 w-full py-4 bg-red-600 text-white rounded-3xl font-semibold">Post Job</button>
+                <div>
+                    <h2 class="text-4xl font-bold">Admin Portal</h2>
+                    <p class="text-gray-500">Manage Jobs &amp; Gigs</p>
+                </div>
+            </div>
+            <button onclick="logoutAdmin()" class="px-6 py-3 border border-red-200 text-red-600 hover:bg-red-50 rounded-2xl font-medium">Logout</button>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 mb-12 shadow border border-red-100">
+            <h3 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                <i class="fas fa-plus text-red-600"></i> Post New Job / Gig
+            </h3>
+            <form id="job-form" onsubmit="addJob(event)">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+                        <input id="title" required class="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company / Poster</label>
+                        <input id="company" required class="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-red-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="description" required rows="5"
+                                  class="w-full px-5 py-4 border border-gray-300 rounded-3xl focus:outline-none focus:border-red-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <input id="location" placeholder="Remote / City, State"
+                               class="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Salary / Compensation</label>
+                        <input id="salary" placeholder="$80k - $120k or $50/hr"
+                               class="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-red-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Application Link
+                            <span class="ml-2 text-xs font-normal text-gray-400">- paste a career page URL or an email address</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-5 flex items-center text-gray-400 pointer-events-none">
+                                <i class="fas fa-link text-sm"></i>
+                            </span>
+                            <input id="apply-link" placeholder="https://company.com/careers  or  jobs@company.com"
+                                   class="w-full pl-12 pr-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-red-500">
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">Leave blank to use the default mailto button.</p>
+                    </div>
+                </div>
+                <button type="submit"
+                        class="mt-8 w-full bg-red-600 hover:bg-red-700 text-white py-5 rounded-3xl font-semibold text-lg transition shadow-md">
+                    Post Job Now
+                </button>
             </form>
+        </div>
+
+        <div class="bg-white rounded-3xl overflow-hidden shadow border border-red-100">
+            <div class="p-8 border-b flex justify-between bg-gray-50">
+                <h3 class="text-2xl font-semibold">All Posted Jobs</h3>
+                <button onclick="clearAllJobs()" class="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1">
+                    <i class="fas fa-trash"></i> Delete All
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b bg-gray-50">
+                            <th class="text-left p-6 font-medium text-gray-500">Title</th>
+                            <th class="text-left p-6 font-medium text-gray-500">Company</th>
+                            <th class="text-left p-6 font-medium text-gray-500">Apply Link</th>
+                            <th class="text-left p-6 font-medium text-gray-500">Date</th>
+                            <th class="text-left p-6 font-medium text-gray-500">Preview</th>
+                            <th class="w-28"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-jobs-table" class="divide-y"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        // === UPDATE THESE ===
-        const SUPABASE_URL = 'https://usgjrtcvcrpqqocvleny.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ2pydGN2Y3JwcXFvY3ZsZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDg2OTgsImV4cCI6MjA5NTM4NDY5OH0.0ju7BrUueQhldAyya--NZYctJ4AOhTll4eop45fVpZc';
+        // ================================================================
+        // SUPABASE CONFIG - Replace these two values with your own project
+        // Get them from: https://supabase.com/dashboard -> Settings -> API
+        // ================================================================
+        const SUPABASE_URL     = 'https://usgjrtcvcrpqqocvleny.supabase.co';       // e.g. https://xxxx.supabase.co
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ2pydGN2Y3JwcXFvY3ZsZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDg2OTgsImV4cCI6MjA5NTM4NDY5OH0.0ju7BrUueQhldAyya--NZYctJ4AOhTll4eop45fVpZc'; // starts with eyJ...
+        // ================================================================
 
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let jobs = [];
-        let currentUser = null;
+        let isAdmin = false;
 
-        // Secret Admin Access
-        if (window.location.search.includes('admin=secret')) {
-            document.getElementById('admin-modal').classList.remove('hidden');
+        function formatDate(date) {
+            return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date));
+        }
+        function isEmail(str) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((str||'')); }
+        function buildApplyHref(link) {
+            if (!link) return null;
+            const l = link.trim();
+            if (isEmail(l)) return 'mailto:' + l;
+            return /^https?:\/\//i.test(l) ? l : 'https://' + l;
+        }
+        function buildApplyButtons(job) {
+            const link = (job.apply_link || '').trim();
+            const label = '<i class="fas fa-' + (link && !isEmail(link) ? 'external-link-alt' : 'envelope') + ' mr-2"></i> Apply';
+            const href  = link ? buildApplyHref(link) : 'mailto:hello@jobsandgigs.com?subject=Application for ' + encodeURIComponent(job.title);
+            const extra = (link && !isEmail(link)) ? ' target="_blank" rel="noopener noreferrer"' : '';
+            return `<a href="${href}"${extra}
+                       class="flex-1 bg-red-600 hover:bg-red-700 text-white text-center py-6 rounded-3xl font-semibold text-lg transition flex items-center justify-center gap-2">
+                        ${label}
+                    </a>`;
         }
 
-        async function loginAdmin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) {
-                alert("Login failed: " + error.message);
-            } else {
-                currentUser = data.user;
-                document.getElementById('admin-modal').classList.add('hidden');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-            }
-        }
-
-        async function logoutAdmin() {
-            await supabase.auth.signOut();
-            document.getElementById('admin-dashboard').classList.add('hidden');
-        }
-
-        async function addJob(e) {
-            e.preventDefault();
-            const newJob = {
-                title: document.getElementById('title').value,
-                company: document.getElementById('company').value,
-                description: document.getElementById('description').value,
-                location: document.getElementById('location').value,
-                salary: document.getElementById('salary').value
-            };
-            await supabase.from('jobs').insert(newJob);
-            alert('Job posted!');
-            e.target.reset();
-        }
-
-        // Load jobs (public)
         async function loadJobs() {
-            const { data } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
+            if (error) { console.error(error); return; }
             jobs = data || [];
             renderJobs();
         }
 
         function renderJobs() {
             const container = document.getElementById('jobs-list');
-            container.innerHTML = jobs.map(job => `
-                <div class="job-card bg-white p-6 rounded-3xl shadow">
-                    <h3 class="font-semibold text-xl">${job.title}</h3>
-                    <p class="text-red-600">${job.company}</p>
-                    <p class="text-gray-600 mt-3 line-clamp-3">${job.description}</p>
-                </div>
-            `).join('');
+            container.innerHTML = '';
+            if (jobs.length === 0) {
+                container.innerHTML = '<div class="col-span-3 text-center py-20 text-gray-400"><i class="fas fa-briefcase text-6xl mb-4"></i><p class="text-xl">No jobs posted yet.</p></div>';
+                document.getElementById('job-count').textContent = '0 jobs posted';
+                return;
+            }
+            jobs.forEach(job => {
+                const card = document.createElement('div');
+                card.className = 'job-card bg-white rounded-3xl p-8 cursor-pointer border border-transparent hover:border-red-100';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="font-semibold text-2xl leading-tight">${job.title}</h3>
+                            <p class="text-red-600 mt-1">${job.company}</p>
+                        </div>
+                        <div class="text-right text-sm text-gray-400">${formatDate(job.created_at)}</div>
+                    </div>
+                    <p class="text-gray-600 line-clamp-3 mb-6">${job.description}</p>
+                    <div class="flex items-center gap-4 text-sm flex-wrap">
+                        ${job.location ? `<span class="px-4 py-1.5 bg-gray-100 rounded-2xl">${job.location}</span>` : ''}
+                        ${job.salary ? `<span class="px-4 py-1.5 bg-emerald-100 text-emerald-700 rounded-2xl">${job.salary}</span>` : ''}
+                        ${job.apply_link ? `<span class="px-4 py-1.5 bg-red-50 text-red-600 rounded-2xl flex items-center gap-1">
+                            <i class="fas ${isEmail(job.apply_link) ? 'fa-envelope' : 'fa-external-link-alt'} text-xs"></i>
+                            ${isEmail(job.apply_link) ? 'Email apply' : 'Apply online'}</span>` : ''}
+                    </div>`;
+                card.onclick = () => showJobDetail(job.id);
+                container.appendChild(card);
+            });
+            document.getElementById('job-count').textContent = `${jobs.length} jobs posted`;
         }
 
-        function filterJobs() {
-            const term = document.getElementById('search-input').value.toLowerCase();
-            const filtered = jobs.filter(j => 
-                j.title.toLowerCase().includes(term) || 
-                j.company.toLowerCase().includes(term)
-            );
-            // Simple render for now
-            document.getElementById('jobs-list').innerHTML = filtered.map(job => `
-                <div class="job-card bg-white p-6 rounded-3xl shadow">
-                    <h3 class="font-semibold text-xl">${job.title}</h3>
-                    <p class="text-red-600">${job.company}</p>
+        function showJobDetail(id) {
+            const job = jobs.find(j => j.id === id);
+            if (!job) return;
+            document.getElementById('home-page').classList.add('hidden');
+            document.getElementById('job-detail-page').classList.remove('hidden');
+            document.getElementById('job-detail-content').innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-4xl font-bold">${job.title}</h1>
+                        <p class="text-2xl text-red-600 mt-2">${job.company}</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-400">Posted on</div>
+                        <div class="font-medium">${formatDate(job.created_at)}</div>
+                    </div>
                 </div>
-            `).join('');
+                <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${job.location ? `<div class="border-l-4 border-red-500 pl-4"><div class="text-xs uppercase tracking-widest text-gray-400">Location</div><div class="font-medium mt-1">${job.location}</div></div>` : ''}
+                    ${job.salary ? `<div class="border-l-4 border-emerald-500 pl-4"><div class="text-xs uppercase tracking-widest text-gray-400">Compensation</div><div class="font-medium mt-1">${job.salary}</div></div>` : ''}
+                    ${job.apply_link ? `<div class="border-l-4 border-blue-400 pl-4"><div class="text-xs uppercase tracking-widest text-gray-400">How to Apply</div>
+                        <div class="font-medium mt-1 text-red-600 truncate">
+                            <i class="fas ${isEmail(job.apply_link) ? 'fa-envelope' : 'fa-external-link-alt'} mr-1 text-sm"></i>
+                            ${isEmail(job.apply_link) ? job.apply_link : 'Career page link'}</div></div>` : ''}
+                </div>
+                <div class="mt-12">
+                    <div class="text-xs uppercase tracking-widest text-gray-400 mb-3">Full Description</div>
+                    <div class="prose text-gray-700 leading-relaxed text-lg">${job.description.replace(/\n/g, '<br><br>')}</div>
+                </div>
+                <div class="mt-16 pt-10 border-t flex gap-4">
+                    ${buildApplyButtons(job)}
+                    <button onclick="copyJobLink('${job.id}')"
+                            class="flex-1 border border-gray-300 hover:bg-gray-50 py-6 rounded-3xl font-semibold text-lg">
+                        <i class="fas fa-share mr-2"></i> Share Link
+                    </button>
+                </div>`;
         }
 
-        window.onload = loadJobs;
+        function copyJobLink(id) {
+            const url = `${window.location.origin}${window.location.pathname}?job=${id}`;
+            navigator.clipboard.writeText(url).then(() => alert('Job link copied!'));
+        }
+
+        async function addJob(e) {
+            e.preventDefault();
+            if (!isAdmin) return;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Posting...';
+            const { data, error } = await supabase.from('jobs').insert([{
+                title:       document.getElementById('title').value,
+                company:     document.getElementById('company').value,
+                description: document.getElementById('description').value,
+                location:    document.getElementById('location').value,
+                salary:      document.getElementById('salary').value,
+                apply_link:  document.getElementById('apply-link').value.trim()
+            }]).select();
+            btn.disabled = false; btn.textContent = 'Post Job Now';
+            if (error) { alert('Error: ' + error.message); return; }
+            jobs.unshift(data[0]);
+            renderJobs(); renderAdminTable();
+            e.target.reset();
+            alert('Job posted successfully!');
+        }
+
+        async function deleteJob(id) {
+            if (!confirm('Delete this job?')) return;
+            const { error } = await supabase.from('jobs').delete().eq('id', id);
+            if (error) { alert(error.message); return; }
+            jobs = jobs.filter(j => j.id !== id);
+            renderJobs(); renderAdminTable();
+        }
+
+        async function clearAllJobs() {
+            if (!confirm('Delete ALL jobs permanently?')) return;
+            const { error } = await supabase.from('jobs').delete().neq('id', '');
+            if (error) { alert(error.message); return; }
+            jobs = []; renderJobs(); renderAdminTable();
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-jobs-table');
+            tbody.innerHTML = '';
+            jobs.forEach(job => {
+                const applyHref = buildApplyHref(job.apply_link);
+                const applyCell = applyHref
+                    ? `<a href="${applyHref}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-sm flex items-center gap-1 max-w-xs truncate">
+                           <i class="fas ${isEmail(job.apply_link||'')?'fa-envelope':'fa-external-link-alt'} text-xs"></i>
+                           ${isEmail(job.apply_link||'')?job.apply_link:(job.apply_link||'').replace(/^https?:\/\//,'').split('/')[0]}</a>`
+                    : '<span class="text-gray-400 text-sm italic">-</span>';
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="p-6 font-medium">${job.title}</td>
+                    <td class="p-6 text-gray-600">${job.company}</td>
+                    <td class="p-6">${applyCell}</td>
+                    <td class="p-6 text-gray-500">${formatDate(job.created_at)}</td>
+                    <td class="p-6"><a href="#" onclick="event.stopImmediatePropagation();showJobDetail('${job.id}');return false;" class="text-red-600 hover:underline text-sm">View Live</a></td>
+                    <td class="p-6"><button onclick="deleteJob('${job.id}');event.stopImmediatePropagation()" class="text-red-500 hover:text-red-600 text-sm">Delete</button></td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        function showHome() {
+            document.getElementById('home-page').classList.remove('hidden');
+            document.getElementById('job-detail-page').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+        }
+        function showAdminLogin() {
+            document.getElementById('admin-login-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('admin-email').focus(), 50);
+        }
+        function hideAdminLogin() {
+            document.getElementById('admin-login-modal').classList.add('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        async function loginAdmin() {
+            const email    = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const btn      = document.getElementById('login-btn');
+            const errBox   = document.getElementById('login-error');
+            if (!email || !password) {
+                errBox.textContent = 'Please enter your email and password.';
+                errBox.classList.remove('hidden'); return;
+            }
+            btn.disabled = true; btn.textContent = 'Signing in...';
+            errBox.classList.add('hidden');
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            btn.disabled = false; btn.textContent = 'Login';
+            if (error) {
+                errBox.textContent = error.message;
+                errBox.classList.remove('hidden'); return;
+            }
+            isAdmin = true;
+            hideAdminLogin();
+            document.getElementById('home-page').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            renderAdminTable();
+        }
+
+        async function logoutAdmin() {
+            await supabase.auth.signOut();
+            isAdmin = false; showHome();
+        }
+
+        function checkDirectJobLink() {
+            const jobId = new URLSearchParams(window.location.search).get('job');
+            if (jobId) { const job = jobs.find(j => String(j.id) === jobId); if (job) showJobDetail(job.id); }
+        }
+
+        async function init() {
+            await loadJobs();
+            checkDirectJobLink();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) isAdmin = true;
+            if (new URLSearchParams(window.location.search).get('secret') === 'admin') {
+                if (isAdmin) {
+                    document.getElementById('home-page').classList.add('hidden');
+                    document.getElementById('admin-dashboard').classList.remove('hidden');
+                    renderAdminTable();
+                } else {
+                    showAdminLogin();
+                }
+            }
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
