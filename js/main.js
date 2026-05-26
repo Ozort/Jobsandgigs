@@ -1,6 +1,8 @@
 // js/main.js
 
-// ================== MAIN UI & JOB FUNCTIONS ==================
+console.log("✅ main.js loaded successfully");
+
+// ================== MAIN UI FUNCTIONS ==================
 function showHome() {
     document.getElementById('home-page').classList.remove('hidden');
     document.getElementById('job-detail-page').classList.add('hidden');
@@ -34,78 +36,36 @@ function showJobDetail(job) {
     `;
 }
 
-async function fetchJobs() {
-    const { data, error } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
-    if (error) console.error(error);
-    else {
-        jobs = data || [];
-        filteredJobs = [...jobs];
-        renderJobs();
-    }
-}
-
-function renderJobs() {
-    const container = document.getElementById('jobs-list');
-    container.innerHTML = '';
-
-    if (filteredJobs.length === 0) {
-        container.innerHTML = `<div class="col-span-3 text-center py-20 text-gray-400">No matching jobs found.</div>`;
-        return;
-    }
-
-    filteredJobs.forEach(job => {
-        const card = document.createElement('div');
-        card.className = `job-card bg-white rounded-3xl p-8 cursor-pointer`;
-        card.innerHTML = `
-            <div class="flex justify-between">
-                <div>
-                    <h3 class="font-semibold text-2xl">${job.title}</h3>
-                    <p class="text-red-600 mt-1">${job.company}</p>
-                </div>
-                <div class="text-sm text-gray-400">${new Date(job.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
-            </div>
-            <p class="text-gray-600 mt-4 line-clamp-3">${job.description}</p>
-            <div class="mt-6 flex gap-3">
-                ${job.location ? `<span class="text-sm px-4 py-1 bg-gray-100 rounded-2xl">${job.location}</span>` : ''}
-                ${job.salary ? `<span class="text-sm px-4 py-1 bg-emerald-100 text-emerald-700 rounded-2xl">${job.salary}</span>` : ''}
-            </div>
-        `;
-        card.onclick = () => showJobDetail(job);
-        container.appendChild(card);
-    });
-
-    document.getElementById('job-count').textContent = `${filteredJobs.length} jobs`;
-}
-
-function filterJobs() {
-    const term = document.getElementById('search-input').value.toLowerCase();
-    filteredJobs = jobs.filter(job => 
-        job.title.toLowerCase().includes(term) || 
-        job.company.toLowerCase().includes(term) ||
-        (job.description && job.description.toLowerCase().includes(term))
-    );
-    renderJobs();
-}
-
-// ================== SECRET ADMIN ACCESS (GitHub Pages Friendly) ==================
+// ================== SECRET ADMIN ACCESS (Improved) ==================
 function checkSecretAccess() {
+    console.log("🔍 Checking secret access...");
+    console.log("Current URL:", window.location.href);
+    console.log("Pathname:", window.location.pathname);
+    console.log("Search params:", window.location.search);
+
     const params = new URLSearchParams(window.location.search);
     
-    if (params.get('access') === 'admin') {
-        console.log("✅ Secret admin access detected via query param");
+    if (params.get('admin') === 'secret' || params.get('access') === 'admin') {
+        console.log("✅ Secret admin code detected! Opening login...");
         showAdminLogin();
-        // Clean up the URL (optional - removes ?admin=secret from address bar)
+        // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+        console.log("❌ No secret param found");
     }
 }
 
-// ================== INIT ==================
+// ================== OTHER FUNCTIONS (fetchJobs, renderJobs, etc.) ==================
+// ... (keep all your existing functions: fetchJobs, renderJobs, filterJobs, etc.)
+
 async function init() {
+    console.log("🚀 Initializing app...");
     await fetchJobs();
     checkSecretAccess();
 
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
+        console.log("👤 User already logged in");
         currentUser = user;
         showAdminDashboard();
     }
