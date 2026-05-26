@@ -1,4 +1,6 @@
+// At the top of js/admin.js
 function showAdminLogin() {
+    console.log("📌 Showing admin login modal");
     document.getElementById('admin-login-modal').classList.remove('hidden');
 }
 
@@ -27,6 +29,7 @@ async function logoutAdmin() {
 }
 
 function showAdminDashboard() {
+    console.log("📊 Showing admin dashboard");
     document.getElementById('home-page').classList.add('hidden');
     document.getElementById('job-detail-page').classList.add('hidden');
     document.getElementById('admin-dashboard').classList.remove('hidden');
